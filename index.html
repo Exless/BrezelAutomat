@@ -1,0 +1,191 @@
+<html>
+  <head>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script
+      defer
+      src="https://use.fontawesome.com/releases/v5.14.0/js/all.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@0.9.0/css/bulma.min.css"
+    />
+  </head>
+  <title>Brezel Automat</title>
+  <body>
+    <div id="app">
+      <!-- button[class='button is-success is-outlined']>span[class='icon is-small']>i[class='fas fa-bold'] -->
+
+      <div class="box">
+        <div class="buttons">
+          <bill
+            v-for="money in coinType"
+            v-bind:moneyobj="money"
+            v-on:add-money="addMoney(money.amount)"
+          ></bill>
+        </div>
+      </div>
+
+      <div class="box">
+        <div class="buttons">
+          <brezelbuy
+            v-for="brezel in brezelType"
+            v-bind:brezelobj="brezel"
+            v-on:buy-brezel="buyBrezel(brezel)"
+          ></brezelbuy>
+        </div>
+      </div>
+
+      <div class="box">
+        <p class="h3">Rückgeld</p>
+        <div class="buttons">
+          <bill
+            v-for="money in returnMoney"
+            v-bind:moneyobj="money"
+            v-on:add-money="takeReturnMoney(money)"
+          ></bill>
+        </div>
+      </div>
+      <div class="box">
+        Göld: {{ moneyInEur }}
+      </div>
+    </div>
+    <script>
+      Vue.component("bill", {
+        props: ["moneyobj"],
+        template: `
+          <button
+            v-on:click="$emit('add-money')"
+            class="button is-success is-outlined is-small"
+          >
+            <span>
+              {{ moneyobj.display }}
+            </span>
+            <span class="icon is-small"> <i class="fas fa-coins"></i> </span>
+          </button>
+        `,
+      });
+
+      Vue.component("billreturn", {
+        props: ["moneyobj"],
+        template: `
+          <button
+            v-on:click="$emit('take-money')"
+            class="button is-success is-outlined is-small"
+          >
+            <span>
+              {{ moneyobj.display }}
+            </span>
+            <span class="icon is-small"> <i class="fas fa-coins"></i> </span>
+          </button>
+        `,
+      });
+
+      Vue.component("brezelbuy", {
+        props: ["brezelobj"],
+        template: `
+          <button
+            v-on:click="$emit('buy-brezel')"
+            class="button is-success is-outlined is-small"
+          >
+            <span>
+              {{ brezelobj.type }}, {{ brezelobj.display }}
+            </span>
+            <span class="icon is-small"> <i class="fas fa-coins"></i> </span>
+          </button>
+        `,
+      });
+      var vm = new Vue({
+        el: "#app",
+        data: {
+          message: "Grüß dich!",
+          currentMoney: 0,
+          coinType: [
+            {
+              amount: 200,
+              display: "€ 2",
+            },
+            {
+              amount: 100,
+              display: "€ 1",
+            },
+            {
+              amount: 50,
+              display: "CENT 50",
+            },
+            {
+              amount: 20,
+              display: "CENT 20",
+            },
+            {
+              amount: 10,
+              display: "CENT 10",
+            },
+            {
+              amount: 5,
+              display: "CENT 5",
+            },
+            {
+              amount: 2,
+              display: "CENT 2",
+            },
+            {
+              amount: 1,
+              display: "CENT 1",
+            },
+          ],
+          returnMoney: [],
+          reutrnMoneyCurrIndex: 0,
+          currentSalt: 5,
+          brezelType: [
+            {
+              type: "Brezel Stange",
+              amount: 300,
+              display: "€ 3",
+              bakeTime: 20,
+            },
+            {
+              type: "Laugenbrezel",
+              amount: 125,
+              display: "€ 1.25",
+              bake_time: 10.69,
+            },
+          ],
+        },
+        methods: {
+          addMoney: function(amount) {
+            this.currentMoney += amount;
+          },
+          buyBrezel: function(brezelObj) {
+            this.currentMoney -= brezelObj.amount
+            this.calculateReturnCoins()
+          },
+          addReturnMoney: function(money) {
+            money.id = ++this.reutrnMoneyCurrIndex
+            this.returnMoney.push(money);
+          },
+          takeReturnMoney: function(moneyObj) {
+            this.addMoney(moneyObj.amount);
+            this.returnMoney.splice(this.returnMoney.findIndex(
+              element => element.id === moneyObj.id), 1);
+          },
+          calculateReturnCoins: function() {
+            while (this.currentMoney > 0) {
+              for (coin in this.coinType) {
+                if (this.coinType[coin].amount <= this.currentMoney) {
+                  this.currentMoney -= this.coinType[coin].amount;
+                  this.addReturnMoney({... this.coinType[coin]});
+                  break
+                }
+              }
+            }
+          },
+        },
+        computed: {
+          moneyInEur: function() {
+            return `€ ${this.currentMoney / 100}`;
+          },
+        },
+      });
+    </script>
+  </body>
+</html>
