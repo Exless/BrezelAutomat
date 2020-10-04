@@ -160,7 +160,7 @@
             this.calculateReturnCoins()
           },
           addReturnMoney: function(money) {
-            money.id = ++this.reutrnMoneyCurrIndex
+            money.id = this.reutrnMoneyCurrIndex++
             this.returnMoney.push(money);
           },
           takeReturnMoney: function(moneyObj) {
@@ -170,10 +170,10 @@
           },
           calculateReturnCoins: function() {
             while (this.currentMoney > 0) {
-              for (coin in this.coinType) {
-                if (this.coinType[coin].amount <= this.currentMoney) {
-                  this.currentMoney -= this.coinType[coin].amount;
-                  this.addReturnMoney({... this.coinType[coin]});
+              for (coin of this.coinType) {
+                if (coin.amount <= this.currentMoney) {
+                  this.currentMoney -= coin.amount;
+                  this.addReturnMoney({... coin});
                   break
                 }
               }
