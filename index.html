@@ -2,7 +2,7 @@
   <head>
     <style>
       .card_extra {
-        font-family: 'Courier New';
+        font-family: "Courier New";
         border-radius: 30px;
         background-color: black;
         color: white;
@@ -25,23 +25,27 @@
       href="https://cdn.jsdelivr.net/npm/bulma@0.9.0/css/bulma.min.css"
     />
   </head>
-  <title>Brezel Automat</title>
+  <title>Steirer Brezel Automat!</title>
   <body>
     <div id="app">
       <!-- button[class='button is-success is-outlined']>span[class='icon is-small']>i[class='fas fa-bold'] -->
 
       <div class="card">
-        <header class="card-header">
-        </header>
+        <header class="card-header"></header>
         <div class="card-content">
           <div class="box">
-            <p class="card_extra is-round class-header-title has-text-centered	is-size-4 has-text-centered">{{terminalDisplay}}</p>
+            <p
+              class="card_extra is-round class-header-title has-text-centered	is-size-4 has-text-centered"
+            >
+              {{terminalDisplay}}
+            </p>
           </div>
           <div class="content">
+
             <div class="box">
-              Guthaben: {{ moneyInEur }}
-            </div>
-            <div class="box">
+              <div class="h3">
+                Wirf Geld ein:
+              </div>
               <div class="buttons">
                 <bill
                   v-for="money in coinType"
@@ -51,6 +55,18 @@
               </div>
             </div>
             <div class="box">
+              <div class="buttons">
+              <progress class="progress is-warning" v-bind:value="salzLevel" max="100"
+                >75%</progress
+              >
+                <button class="button is-outlined is-small" @click=increaseSalz(salzIncrement)>Salz +</button>
+                <button class="button is-outlined is-small" @click="increaseSalz(-salzIncrement)">Salz -</button>
+              </div>
+            </div>
+            <div class="box">
+              <div class="h3">
+                Brezel Optionen:
+              </div>
               <div class="buttons">
                 <brezelbuy
                   v-for="brezel in brezelType"
@@ -122,8 +138,9 @@
       var vm = new Vue({
         el: "#app",
         data: {
-          message: "Grüß dich!",
           terminalDisplay: "Grüß dich!",
+          salzLevel: 10,
+          salzIncrement: 5,
           currentMoney: 0,
           coinType: [
             {
@@ -161,19 +178,18 @@
           ],
           returnMoney: [],
           reutrnMoneyCurrIndex: 0,
-          currentSalt: 5,
           brezelType: [
             {
               type: "Brezel Stange",
               amount: 300,
               display: "€ 3",
-              bakeTime: 20,
+              bakeTime: 10,
             },
             {
               type: "Laugenbrezel",
               amount: 125,
               display: "€ 1.25",
-              bake_time: 10.69,
+              bakeTime: 5,
             },
           ],
         },
@@ -183,16 +199,32 @@
           },
           addMoney: function(amount) {
             this.currentMoney += amount;
+            this.terminalDisplay = `${this.moneyInEur}`
           },
-          buyBrezel: function(brezelObj) {
-            if (this.currentMoney > brezelObj.amount) {
+          increaseSalz: async function(amount) {
+            for (i = 0; i <= 100; i++){
+            this.salzLevel += amount/100;
+            await this.sleep(1);
+            }
+          },
+          buyBrezel: async function(brezelObj) {
+            if (this.currentMoney >= brezelObj.amount) {
+              await this.bakeBrezel(brezelObj);
               this.calculateReturnCoins(
                 (this.currentMoney -= brezelObj.amount)
               );
               this.currentMoney = 0;
-            }
-            else
+            } else { 
               this.terminalDisplay = "Nicht genug Göld!";
+              await this.sleep(500);
+              this.addMoney(0);
+            };
+          },
+          bakeBrezel: async function(brezelObj) {
+            this.terminalDisplay = "Brezel Wird Gebacken";
+            await this.sleep(brezelObj.bakeTime * 1000);
+            this.increaseSalz(-10);
+            this.terminalDisplay = "Genieße deine Brezel!";
           },
           addReturnMoney: function(money) {
             money.id = this.reutrnMoneyCurrIndex++;
